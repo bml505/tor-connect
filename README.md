@@ -1,4 +1,4 @@
 # Tor-connect
 Thin tor client library
 
-TODO: Add meaningful description here
+A simple torus library for developers of c++
