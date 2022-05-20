@@ -71,21 +71,27 @@ RelayCell::RelayCell(Cell& cell) :Cell()
     copy(cell.GetBuffer(), cell.GetBuffer() + GetBufferSize(), GetBuffer());
 }
 
-void RelayCell::AppendData(u16 streamId, cell_command relay_command, int length) {
-    Append(static_cast<unc>(relay_command));                // relay command   
-    Append(static_cast<uint16_t>(0));                       // recognized   
-    Append(streamId);                                       // steram id 
-    Append(static_cast<u32>(0));                            // digest placeholder (0 for now) 
-    //Append(static_cast<u16>(length));                     // length 
-    Append(static_cast<u16>(0x77));                         // length 
+void RelayCell::AppendData(u16 streamId, cell_command relay_command, size_t length) {
+    Append(static_cast<unc>(relay_command));                // relay command                    1 byte
+    Append(static_cast<u16>(0));                            // recognized                       2 bytes
+    Append(streamId);                                       // steram id                        2 bytes
+    Append(static_cast<u32>(0));                            // digest placeholder (0 for now)   4 bytes
+    Append(static_cast<u16>(0x77));                         // length                           2 bytes
+    // Total 11 bytes
 }
 
-void RelayCell::SetLengthRelayPayload() {
-    u16 length = GetPayloadSize();
-    uint8_t d[2] = { 0 };
-    for (int i = 0; i < 2; ++i)
-        d[i] = (reinterpret_cast<u8*>(&length))[1 - i];
-    memcpy(GetBuffer() + RELAY_PAYLOAD_OFFSET, d, 2);
+bool RelayCell::SetLengthRelayPayload(size_t size_data_arg) {
+    if(size_data_arg>TOR_MAX_CELL_PAYLOAD_DATA)
+    {
+        BOOST_LOG_TRIVIAL(error) << "The length of the data is longer than the maximum length of the cell";
+        return false;
+    }    
+
+    u16 size_data = static_cast<u16>(size_data_arg);
+    unc len_payload[RELAY_BYTES_LEN];
+    Util::Int16ToArrayBigEndian(len_payload, size_data);
+    memcpy(GetBuffer() + RELAY_PAYLOAD_OFFSET, len_payload, RELAY_BYTES_LEN);
+    return true;
 }
 
 void RelayCell::SetDigest(unc* digest) {
@@ -97,7 +103,7 @@ void RelayCell::GetDigest(unc* buf) {
 }
 
 unc* RelayCell::GetRelayPayload() {
-    return GetBuffer() + RELAY_PAYLOAD_OFFSET;
+    return GetBuffer() + RELAY_PAYLOAD_OFFSET + RELAY_BYTES_LEN;
 }
 
 int RelayCell::GetRelayPayloadLength() {

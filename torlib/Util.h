@@ -35,13 +35,13 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
  
+#include <memory>
 #include <cstdint>
 #include <iostream>
 #include <sstream>
 #include <locale>
 #include <stdexcept>
 #include <boost/filesystem.hpp>
-#include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -91,7 +91,7 @@
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/assert.hpp>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/format.hpp>
@@ -116,8 +116,9 @@ namespace pl = net::placeholders;
 namespace sys = boost::system;
 namespace ssl = boost::asio::ssl;
 namespace fs = boost::filesystem;
-//using log = boost::log; 
-
+using timer = boost::asio::steady_timer;
+using log_lv = boost::log::trivial::severity_level;
+using sec = boost::posix_time::seconds;
 
 
 using std::string;
@@ -128,7 +129,7 @@ using std::map;
 using std::copy;
 using std::reverse;
 using std::make_tuple;
-using std::make_unique; 
+//using std::make_unique; 
 using std::tuple;
 using std::min;
 using std::ifstream;
@@ -145,10 +146,10 @@ private:
  public:
   static void Int64ToArrayBigEndian(unc*a, u64 i);
   static void Int32ToArrayBigEndian(unc*a, u32 i);
-  static void Int16ToArrayBigEndian(unc*a, u32 i);
+  static void Int16ToArrayBigEndian(unc*a, u16 i);
   static uint16_t BigEndianArrayToShort(unc*buf);
   static uint32_t BigEndianArrayToInt(unc*buf);
-  static void HexDump(unc* buf, int length);
+  static void HexDump(unc* buf, size_t length);
   static void Base16Encode(char *dest, size_t destlen, const char *src, size_t srclen);
   static uint16_t GetRandomId();
   static uint32_t GetRandom();  

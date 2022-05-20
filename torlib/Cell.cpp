@@ -66,7 +66,7 @@ void Cell::Append(string& val) {
 	index += val.length();
 }
 
-void Cell::Append(unc* segment, int length) {
+void Cell::Append(unc* segment, size_t length) {
 	memcpy(buffer + index, segment, length);
 	index += length;
 }
@@ -92,7 +92,7 @@ unsigned char* Cell::GetPayload() {
 	return buffer + POSITION_PAYLOAD_SIZE;
 }
 
-int Cell::GetPayloadSize() {
+size_t Cell::GetPayloadSize() {
 	return sizeof(buffer) - POSITION_PAYLOAD_SIZE;
 }
 
@@ -100,12 +100,12 @@ unsigned char* Cell::GetBuffer() {
 	return buffer;
 }
 
-int Cell::GetBufferSize() {
+size_t Cell::GetBufferSize() {
 	if (IsVariableLen())
 		return sizeof(buffer);
 	else return CELL_SIZE;
 }
-int Cell::GetCurentIndex() {
+size_t Cell::GetCurentIndex() {
 	return index;
 }
 
@@ -120,7 +120,7 @@ bool Cell::IsVariableLen() {
 	return GetCommand() == cell_command::versions || GetCommand() >= 128;
 }
 unc* Cell::GetPayloadPart(int begin, int end) {	
-	size_t len = end-begin;	
+	size_t len = end - begin;	
 	if (len <= 0|| (begin+len)>=CELL_SIZE) return nullptr;
 	unc* segment = static_cast<unc*>(malloc(len));
 	memcpy(segment, buffer + begin, len);

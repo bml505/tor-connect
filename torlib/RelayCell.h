@@ -35,9 +35,12 @@
 #include "Cell.h"
 #include "Util.h"
 
+#define TOR_MAX_CELL_PAYLOAD_DATA 117
+
 #define DIGEST_OFFSET 10
 #define DIGEST_LENGTH 4
 #define RELAY_PAYLOAD_OFFSET 14
+#define RELAY_BYTES_LEN 2
 #define HANDSHAKE_DATA 18
 #define RELAY_TYPE_OFFSET 5
 #define STREAM_ID_OFFSET 7
@@ -50,7 +53,7 @@ class RelayCell :
     public Cell
 {
 private:
-    void AppendData(u16 streamId, cell_command relay_command, int length);
+    void AppendData(u16 streamId, cell_command relay_command, size_t length);
 public:
     RelayCell(u32 circuitId, u16 streamId, cell_command command, cell_command relay_command);
     RelayCell(u16 streamId, cell_command command, cell_command relay_command);
@@ -64,7 +67,7 @@ public:
     int GetRelayPayloadLength();
     unc GetRelayType();
     bool IsRelayEnd();
-    void SetLengthRelayPayload();
+    bool SetLengthRelayPayload(size_t size_data);
     u16 GetStreamId();
 };
 

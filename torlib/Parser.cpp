@@ -123,7 +123,7 @@ bool Parser::SetOnionRouterKeys(shared_ptr<OnionRouter> onion_node, vector<strin
 
 vector<string> Parser::SearchOnionRouter(vector<string>& in_data, bool random, int or_port, int dir_port, string sh_ip, vector<string> flags, int search_port)
 {
-	int index;
+	size_t index = 0;
 	if (random) index = Util::GetRandom() % in_data.size();
 	else index = 0;
 	vector<string> str_data;
@@ -222,7 +222,7 @@ shared_ptr<OnionRouter> Parser::GetOnionRouter(vector<string>& in_data, bool ran
 	shared_ptr<OnionRouter> retOn = make_shared<OnionRouter>();
 	vector<string> data_node;
 	for (int i = 0; i < 10 && data_node.size() == 0; ++i)
-		data_node = SearchOnionRouter(in_data, random, or_port, dir_port, sh_ip, flags);
+		data_node = SearchOnionRouter(in_data, random, or_port, dir_port, sh_ip, flags, search_port);
 	if (data_node.size() > 0)
 	{
 		//vector<string> str_data = ParsString(in_data[index], " ");

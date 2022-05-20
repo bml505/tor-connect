@@ -34,7 +34,6 @@
 #include "NetConnect.h"
 #include "Util.h"
 #include "Cell.h"
-#include "tor_lib_iface.h"
 
 enum class link_specifier_type : u8
 {
@@ -44,35 +43,36 @@ enum class link_specifier_type : u8
 };
 
 
-class TorLib: public tools::tor::t_tranport
+class TorLib
 {
-private:	
+private:
 	bool GetConsensus();
 	bool GetKeysNode(int n_node);
 
-        bool ConnectToNode(int n_node, int search_port = 0);
+	bool ConnectToNode(int n_node, int search_port = 0);
 
 	//int connection_handle;
 	vector<tuple<string, string, int, int>> DA;
 	Parser parser;
-	
-	string GetDataFromUrl(const string host, const int port, const string target);
+
+	//string GetDataFromUrl(const string host, const int port, const string target);
+	string GetDataFromUrlAsync(const string host, const int port, const string target);
 
 	net::io_service io_service;
 	shared_ptr<net::io_service::work> work;
-	//net::io_service::work work;
+	unique_ptr<net::deadline_timer> dtimer;
 	unique_ptr<NetConnect> net_connect;
-	bool operation_completed;
-	bool error_last_operation;
+	bool operation_completed = false;
+	bool error_last_operation = false;
 	map<int, shared_ptr<OnionRouter>> onion_routers;
 
 	bool SendNodeInfo(ConnectFunction connectFunc);
 	void ReadNodeInfo(ConnectFunction connectFunc, const sys::error_code& err);
-	void SendInfoComplete(ConnectFunction connectFunc, shared_ptr<Cell> node_info, const sys::error_code& err);	
+	void SendInfoComplete(ConnectFunction connectFunc, shared_ptr<Cell> node_info, const sys::error_code& err);
 	void LogErr(const sys::error_code& err);
-	
+
 	bool CreateNtor(int n_node, ConnectFunction connectFunc);
-	void ReadCNtor(int n_node, ConnectFunction connectFunc, const sys::error_code& err);	
+	void ReadCNtor(int n_node, ConnectFunction connectFunc, const sys::error_code& err);
 	void CreateNtorComplete(int n_node, ConnectFunction connectFunc, shared_ptr<Cell> node_info, const sys::error_code& err);
 
 	bool CreateExtendNtor(int n_node, ConnectFunction connectFunc);
@@ -84,25 +84,26 @@ private:
 	void CreateStreamComplete(int n_node, ConnectFunction connectFunc, shared_ptr<Cell> node, const sys::error_code& err);
 
 	string stream_host;
-	int stream_port;
-	int n_stream;
-
+	int stream_port = 0;
+	int n_stream = 0;
+	int timeout_global = 0;
 	vector<std::string> data_consensus;
 	string data_result;
+	uint64_t last_consensus_receive_time = 0;
 
 	u32 circuit_id = 1;
 
-	bool SendData(string reqest, ConnectFunction connectFunc);
+	bool SendData(string reqest/* , ConnectFunction connectFunc*/);
 	void ReadStreamData(int n_node, ConnectFunction connectFunc, const sys::error_code& err);
+	void ReadStreamOne(int n_node, ConnectFunction connectFunc);
 	void ReadStreamComplete(int n_node, ConnectFunction connectFunc, shared_ptr<Cell> node, const sys::error_code& err);
-
+	void OnTimeout(const sys::error_code& err);
 public:
 	~TorLib();
-  // ------------- t_tranport ------------- 
-	virtual bool Init();
-  virtual int Connect(const string ip, const int port, const int timeout=0);
-  virtual bool Close();
-  virtual bool Send(const string& path);
-  virtual bool Receive(string& buff, const int timeout=0);
+	bool Init(log_lv log_level = boost::log::trivial::info);
+	int Connect(const string ip, const int port, const int timeout = 0);
+	bool Close();
+	bool Send(const string& path);
+	bool Receive(string& buff, const int timeout = 0);
 };
 

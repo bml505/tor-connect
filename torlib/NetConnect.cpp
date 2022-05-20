@@ -266,7 +266,7 @@ void NetConnect::DummyFunc(const sys::error_code& error) {
 void NetConnect::WriteCell(Cell& cell, ConnectFunction connectFunc) {
 	BOOST_LOG_TRIVIAL(debug) << "NetConnect::WriteCell";
 	unc* buffer = cell.GetBuffer();
-	int len = cell.GetBufferSize();
+	size_t len = cell.GetBufferSize();
 	Util::HexDump(buffer, len);
 	net::async_write(socket, net::buffer(buffer, len),
 		boost::bind(&NetConnect::WriteCellComplete, this, connectFunc, pl::error));
@@ -320,4 +320,9 @@ void NetConnect::HexDumpResponse()
 	std::string data_str(std::istreambuf_iterator<char>(response_stream), eos);
 	unc* res_data = reinterpret_cast<unc*>(const_cast<char*>(data_str.c_str()));
 	Util::HexDump(res_data, data_str.length());
+}
+void NetConnect::ShutDown()
+{
+	BOOST_LOG_TRIVIAL(debug) << "NetConnect::ShutDown";
+	socket.shutdown(); 
 }

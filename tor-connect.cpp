@@ -33,10 +33,8 @@
 
 int main()
 {
-    //setlocale(LC_CTYPE, "rus"); // set locale
     TorLib tlb;
     // track your own variable here
-    //log::trivial::severity_level log_level = log::trivial::info;
     tlb.Init();
     int err_connect = tlb.Connect("ifconfig.me", 80, 0);
     if (err_connect == 0)
