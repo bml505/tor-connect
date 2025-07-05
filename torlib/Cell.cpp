@@ -40,7 +40,8 @@ Cell::Cell(u32 circuit_id, cell_command command) {
 	index = POSITION_PAYLOAD_SIZE;
 }
 Cell::Cell() {
-	index = POSITION_PAYLOAD;
+        memset(buffer, 0, sizeof(buffer));
+        index = POSITION_PAYLOAD;
 }
 
 unsigned char Cell::GetCommand() {
